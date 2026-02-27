@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>P(harm | defect) Reference Table</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #21262d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --pass: #238636;
+    --pass-text: #3fb950;
+    --warn: #9e6a03;
+    --warn-text: #d29922;
+    --fail: #6e1a1a;
+    --fail-text: #f85149;
+    --threshold: 0.4098; /* 40.98% for original, overridden by JS */
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-size: 13px;
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  header {
+    margin-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 20px;
+  }
+
+  header h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
+  }
+
+  header p {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.6;
+  }
+
+  .controls {
+    display: flex;
+    gap: 24px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+  }
+
+  .control-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .control-group label {
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .control-group input {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    padding: 7px 12px;
+    border-radius: 6px;
+    width: 140px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .control-group input:focus {
+    border-color: var(--accent);
+  }
+
+  .derived {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    display: flex;
+    gap: 32px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .derived-item {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .derived-item .label {
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+  }
+
+  .derived-item .value {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+  }
+
+  th {
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    padding: 10px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+
+  th.row-header {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--surface);
+  }
+
+  td {
+    padding: 9px 14px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    transition: opacity 0.15s;
+    white-space: nowrap;
+  }
+
+  td.row-label {
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background: var(--bg);
+    color: var(--muted);
+    font-weight: 600;
+    border-right: 2px solid var(--border);
+  }
+
+  tr:last-child td { border-bottom: none; }
+
+  td.pass {
+    background: rgba(35, 134, 54, 0.15);
+    color: var(--pass-text);
+  }
+
+  td.warn {
+    background: rgba(158, 106, 3, 0.15);
+    color: var(--warn-text);
+  }
+
+  td.fail {
+    background: rgba(110, 26, 26, 0.12);
+    color: var(--fail-text);
+  }
+
+  td.threshold-col {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .legend-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+  }
+
+  .note {
+    margin-top: 20px;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.7;
+    border-left: 2px solid var(--border);
+    padding-left: 12px;
+  }
+
+  tr:hover td { opacity: 0.85; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>P(harm | defect) — 95% Upper Confidence Bound</h1>
+  <p>One-sided binomial (0 failures). Adjust parameters to update the table in real time.</p>
+</header>
+
+<div class="controls">
+  <div class="control-group">
+    <label>Visual Void Rate (%)</label>
+    <input type="number" id="visualVoidRate" value="1.38" step="0.01" min="0.01" max="100">
+  </div>
+  <div class="control-group">
+    <label>CT Confirmation Rate (%)</label>
+    <input type="number" id="ctRate" value="57" step="0.1" min="0.1" max="100">
+  </div>
+  <div class="control-group">
+    <label>Risk Requirement (%)</label>
+    <input type="number" id="riskReq" value="0.5" step="0.01" min="0.01" max="100">
+  </div>
+  <div class="control-group">
+    <label>Design Life (cycles)</label>
+    <input type="number" id="designLife" value="20" step="1" min="1" max="200">
+  </div>
+</div>
+
+<div class="derived">
+  <div class="derived-item">
+    <span class="label">P(defect)</span>
+    <span class="value" id="pDefect">—</span>
+  </div>
+  <div class="derived-item">
+    <span class="label">Max allowable P(harm | defect)</span>
+    <span class="value" id="maxAllowable">—</span>
+  </div>
+  <div class="derived-item">
+    <span class="label">Confidence Level</span>
+    <span class="value">95%</span>
+  </div>
+</div>
+
+<div class="table-wrapper">
+  <table id="mainTable">
+  </table>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(35,134,54,0.4)"></div> Pass — P(loss of vision) &lt; requirement</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(158,106,3,0.4)"></div> Marginal — within 10% of threshold</div>
+  <div class="legend-item"><div class="legend-dot" style="background:rgba(110,26,26,0.3)"></div> Fail — P(loss of vision) ≥ requirement</div>
+</div>
+
+<div class="note" id="noteText"></div>
+
+<script>
+  const SAMPLE_COUNTS = [3, 4, 5, 6, 7, 8, 10, 12, 15, 20];
+
+  function getCycleColumns(designLife) {
+    const cols = [];
+    const step = Math.max(1, Math.floor(designLife / 10));
+    for (let c = step; c <= designLife * 3; c += step) cols.push(c);
+    // ensure design life itself is included
+    if (!cols.includes(designLife)) {
+      cols.push(designLife);
+      cols.sort((a, b) => a - b);
+    }
+    return cols;
+  }
+
+  // UCB for 0 failures: 1 - alpha^(1/n_equiv)
+  function ucb0(nEquiv, alpha = 0.05) {
+    if (nEquiv <= 0) return 1;
+    return 1 - Math.pow(alpha, 1 / nEquiv);
+  }
+
+  function equivalentSamples(nSamples, cycles, designLife) {
+    return nSamples * (cycles / designLife);
+  }
+
+  function render() {
+    const visualVoidRate = parseFloat(document.getElementById('visualVoidRate').value) / 100;
+    const ctRate = parseFloat(document.getElementById('ctRate').value) / 100;
+    const riskReq = parseFloat(document.getElementById('riskReq').value) / 100;
+    const designLife = parseInt(document.getElementById('designLife').value);
+
+    const pDefect = visualVoidRate * ctRate;
+    const maxAllowable = riskReq / pDefect;
+
+    document.getElementById('pDefect').textContent = (pDefect * 100).toFixed(4) + '%';
+    document.getElementById('maxAllowable').textContent = (maxAllowable * 100).toFixed(2) + '%';
+
+    const cycleCols = getCycleColumns(designLife);
+
+    const table = document.getElementById('mainTable');
+    table.innerHTML = '';
+
+    // Header
+    const thead = document.createElement('thead');
+    const headerRow = document.createElement('tr');
+    const cornerTh = document.createElement('th');
+    cornerTh.className = 'row-header';
+    cornerTh.textContent = 'N samples \\ Cycles';
+    headerRow.appendChild(cornerTh);
+
+    cycleCols.forEach(c => {
+      const th = document.createElement('th');
+      th.textContent = c === designLife ? `${c} ★` : c;
+      if (c === designLife) th.style.color = 'var(--accent)';
+      headerRow.appendChild(th);
+    });
+    thead.appendChild(headerRow);
+    table.appendChild(thead);
+
+    // Body
+    const tbody = document.createElement('tbody');
+
+    SAMPLE_COUNTS.forEach(n => {
+      const tr = document.createElement('tr');
+      const rowLabel = document.createElement('td');
+      rowLabel.className = 'row-label';
+      rowLabel.textContent = `n = ${n}`;
+      tr.appendChild(rowLabel);
+
+      cycleCols.forEach(c => {
+        const td = document.createElement('td');
+        const nEquiv = equivalentSamples(n, c, designLife);
+        const ucb = ucb0(nEquiv);
+        const pHarm = pDefect * ucb;
+
+        td.textContent = (ucb * 100).toFixed(1) + '%';
+
+        const margin = maxAllowable * 0.10;
+        if (pHarm < riskReq) {
+          if (ucb > maxAllowable - margin) {
+            td.className = 'warn';
+            td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% — marginal`;
+          } else {
+            td.className = 'pass';
+            td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% ✓`;
+          }
+        } else {
+          td.className = 'fail';
+          td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% — exceeds requirement`;
+        }
+
+        if (c === designLife) td.classList.add('threshold-col');
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    table.appendChild(tbody);
+
+    // Find minimum cycles for n=5 and n=7
+    const note5 = findMinCycles(5, designLife, maxAllowable, pDefect, riskReq);
+    const note7 = findMinCycles(7, designLife, maxAllowable, pDefect, riskReq);
+    document.getElementById('noteText').innerHTML =
+      `★ = design life (${designLife} cycles) &nbsp;|&nbsp; ` +
+      `Minimum cycles to pass with n=5: <strong style="color:var(--pass-text)">${note5} cycles</strong> &nbsp;|&nbsp; ` +
+      `Minimum cycles to pass with n=7: <strong style="color:var(--pass-text)">${note7} cycles</strong>`;
+  }
+
+  function findMinCycles(n, designLife, maxAllowable, pDefect, riskReq) {
+    for (let c = 1; c <= designLife * 10; c++) {
+      const nEquiv = equivalentSamples(n, c, designLife);
+      const ucb = ucb0(nEquiv);
+      if (pDefect * ucb < riskReq) return c;
+    }
+    return 'N/A';
+  }
+
+  ['visualVoidRate', 'ctRate', 'riskReq', 'designLife'].forEach(id => {
+    document.getElementById(id).addEventListener('input', render);
+  });
+
+  render();
+</script>
+</body>
+</html>
