@@ -302,12 +302,13 @@
 <script>
   function getCycleColumns(designLife, maxCycles) {
     const cols = [];
-    const step = Math.max(1, Math.floor(designLife / 10));
-    for (let c = step; c <= maxCycles; c += step) cols.push(c);
+    for (let c = 5; c <= maxCycles; c += 5) cols.push(c);
+    // ensure design life is included if not already a multiple of 5
     if (!cols.includes(designLife) && designLife <= maxCycles) {
       cols.push(designLife);
       cols.sort((a, b) => a - b);
     }
+    // ensure maxCycles is included if not already a multiple of 5
     if (!cols.includes(maxCycles)) {
       cols.push(maxCycles);
       cols.sort((a, b) => a - b);
