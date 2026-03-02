@@ -14,13 +14,9 @@
     --text: #e6edf3;
     --muted: #8b949e;
     --accent: #58a6ff;
-    --pass: #238636;
     --pass-text: #3fb950;
-    --warn: #9e6a03;
     --warn-text: #d29922;
-    --fail: #6e1a1a;
     --fail-text: #f85149;
-    --threshold: 0.4098; /* 40.98% for original, overridden by JS */
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -34,404 +30,461 @@
     padding: 32px 24px;
   }
 
-  header {
-    margin-bottom: 28px;
-    border-bottom: 1px solid var(--border);
-    padding-bottom: 20px;
-  }
+  header { margin-bottom: 28px; border-bottom: 1px solid var(--border); padding-bottom: 20px; }
+  header h1 { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 600; color: var(--accent); letter-spacing: -0.5px; margin-bottom: 6px; }
+  header p { color: var(--muted); font-size: 12px; line-height: 1.6; }
 
-  header h1 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 18px;
-    font-weight: 600;
-    color: var(--accent);
-    letter-spacing: -0.5px;
-    margin-bottom: 6px;
-  }
+  .tabs { display: flex; gap: 4px; margin-bottom: 24px; border-bottom: 1px solid var(--border); }
+  .tab-btn { background: none; border: none; border-bottom: 2px solid transparent; color: var(--muted); cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.5px; padding: 10px 20px; margin-bottom: -1px; text-transform: uppercase; transition: color 0.15s, border-color 0.15s; }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { border-bottom-color: var(--accent); color: var(--accent); }
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
 
-  header p {
-    color: var(--muted);
-    font-size: 12px;
-    line-height: 1.6;
-  }
+  .controls { display: flex; gap: 24px; margin-bottom: 24px; flex-wrap: wrap; align-items: flex-end; }
+  .control-group { display: flex; flex-direction: column; gap: 6px; }
+  .control-group label { font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .control-group input { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 7px 12px; border-radius: 6px; width: 140px; outline: none; transition: border-color 0.15s; }
+  .control-group input:focus { border-color: var(--accent); }
 
-  .controls {
-    display: flex;
-    gap: 24px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    align-items: flex-end;
-  }
+  .derived { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 16px; display: flex; gap: 32px; margin-bottom: 24px; flex-wrap: wrap; }
+  .derived-item { display: flex; flex-direction: column; gap: 3px; }
+  .derived-item .label { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .derived-item .value { font-family: 'IBM Plex Mono', monospace; font-size: 14px; font-weight: 600; color: var(--accent); }
 
-  .control-group {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .control-group label {
-    font-size: 11px;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-
-  .control-group input {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 13px;
-    padding: 7px 12px;
-    border-radius: 6px;
-    width: 140px;
-    outline: none;
-    transition: border-color 0.15s;
-  }
-
-  .control-group input:focus {
-    border-color: var(--accent);
-  }
-
-  .derived {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 16px;
-    display: flex;
-    gap: 32px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-  }
-
-  .derived-item {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-  }
-
-  .derived-item .label {
-    font-size: 10px;
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-  }
-
-  .derived-item .value {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--accent);
-  }
-
-  .table-wrapper {
-    overflow-x: auto;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-  }
-
-  table {
-    border-collapse: collapse;
-    width: 100%;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-  }
-
-  th {
-    background: var(--surface);
-    color: var(--muted);
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    padding: 10px 14px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-  }
-
-  th.row-header {
-    text-align: left;
-    position: sticky;
-    left: 0;
-    z-index: 3;
-    background: var(--surface);
-  }
-
-  td {
-    padding: 9px 14px;
-    text-align: center;
-    border-bottom: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    transition: opacity 0.15s;
-    white-space: nowrap;
-  }
-
-  td.row-label {
-    text-align: left;
-    position: sticky;
-    left: 0;
-    z-index: 1;
-    background: var(--bg);
-    color: var(--muted);
-    font-weight: 600;
-    border-right: 2px solid var(--border);
-  }
-
+  .table-wrapper { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  table { border-collapse: collapse; width: 100%; font-family: 'IBM Plex Mono', monospace; font-size: 12px; }
+  th { background: var(--surface); color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: 0.8px; padding: 10px 14px; text-align: center; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+  th.row-header { text-align: left; position: sticky; left: 0; z-index: 3; background: var(--surface); }
+  td { padding: 9px 14px; text-align: center; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); transition: opacity 0.15s; white-space: nowrap; }
+  td.row-label { text-align: left; position: sticky; left: 0; z-index: 1; background: var(--bg); color: var(--muted); font-weight: 600; border-right: 2px solid var(--border); }
   tr:last-child td { border-bottom: none; }
-
-  td.pass {
-    background: rgba(35, 134, 54, 0.15);
-    color: var(--pass-text);
-  }
-
-  td.warn {
-    background: rgba(158, 106, 3, 0.15);
-    color: var(--warn-text);
-  }
-
-  td.fail {
-    background: rgba(110, 26, 26, 0.12);
-    color: var(--fail-text);
-  }
-
-  td.threshold-col {
-    outline: 2px solid var(--accent);
-    outline-offset: -2px;
-  }
-
-  .legend {
-    display: flex;
-    gap: 20px;
-    margin-top: 16px;
-    flex-wrap: wrap;
-  }
-
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 11px;
-    color: var(--muted);
-  }
-
-  .legend-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 2px;
-  }
-
-  .note {
-    margin-top: 20px;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.7;
-    border-left: 2px solid var(--border);
-    padding-left: 12px;
-  }
-
   tr:hover td { opacity: 0.85; }
+  td.pass { background: rgba(35,134,54,0.15); color: var(--pass-text); }
+  td.warn { background: rgba(158,106,3,0.15); color: var(--warn-text); }
+  td.fail { background: rgba(110,26,26,0.12); color: var(--fail-text); }
+  td.threshold-col { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .legend { display: flex; gap: 20px; margin-top: 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+  .legend-dot { width: 12px; height: 12px; border-radius: 2px; }
+
+  .note { margin-top: 20px; font-size: 11px; color: var(--muted); line-height: 1.7; border-left: 2px solid var(--border); padding-left: 12px; }
+
+  /* Contingency tab */
+  .section-sub { color: var(--muted); font-size: 12px; margin-bottom: 20px; line-height: 1.6; }
+  #failureRows { margin-bottom: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .failure-row { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 10px 14px; }
+  .failure-row label { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.6px; min-width: 110px; }
+  .failure-row input { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 5px 10px; border-radius: 4px; width: 100px; outline: none; }
+  .failure-row input:focus { border-color: var(--accent); }
+  .fail-badge { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--fail-text); background: rgba(110,26,26,0.2); border-radius: 4px; padding: 2px 10px; white-space: nowrap; }
+
+  .btn { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; color: var(--text); cursor: pointer; font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 8px 16px; transition: border-color 0.15s, color 0.15s; }
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.btn-danger:hover { border-color: var(--fail-text); color: var(--fail-text); }
+
+  .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin-top: 20px; }
+  .result-card.pass-card { border-color: rgba(35,134,54,0.5); }
+  .result-card.fail-card { border-color: rgba(248,81,73,0.5); }
+  .result-card.warn-card { border-color: rgba(210,153,34,0.5); }
+  .result-title { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; margin-bottom: 14px; }
+  .result-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 16px; margin-bottom: 4px; }
+  .result-stat { display: flex; flex-direction: column; gap: 3px; }
+  .result-stat .r-label { font-size: 10px; font-family: 'IBM Plex Mono', monospace; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; }
+  .result-stat .r-value { font-family: 'IBM Plex Mono', monospace; font-size: 16px; font-weight: 600; }
+  .result-stat .r-value.pass { color: var(--pass-text); }
+  .result-stat .r-value.warn { color: var(--warn-text); }
+  .result-stat .r-value.fail { color: var(--fail-text); }
+  .result-detail { font-size: 11px; color: var(--muted); line-height: 1.8; border-top: 1px solid var(--border); padding-top: 12px; margin-top: 12px; }
+  .verdict { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 6px; margin-top: 14px; display: inline-block; }
+  .verdict.pass { background: rgba(35,134,54,0.15); color: var(--pass-text); }
+  .verdict.warn { background: rgba(158,106,3,0.15); color: var(--warn-text); }
+  .verdict.fail { background: rgba(110,26,26,0.2); color: var(--fail-text); }
+  .divider { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+  .sub-section { border-top: 1px solid var(--border); padding-top: 14px; margin-top: 4px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>P(harm | defect) — 95% Upper Confidence Bound</h1>
-  <p>One-sided binomial (0 failures). Adjust parameters to update the table in real time.</p>
+  <h1>P(harm | defect) — Risk Assessment Tool</h1>
+  <p>Attribute (pass/fail) one-sided binomial confidence interval at 95% confidence. All inputs update results in real time.</p>
 </header>
 
-<div class="controls">
-  <div class="control-group">
-    <label>Visual Void Rate (%)</label>
-    <input type="number" id="visualVoidRate" value="1.38" step="0.01" min="0.01" max="100">
+<div class="tabs">
+  <button class="tab-btn active" id="btn-table" onclick="switchTab('table', this)">Reference Table</button>
+  <button class="tab-btn" id="btn-contingency" onclick="switchTab('contingency', this)">Failure Contingency</button>
+</div>
+
+<!-- ══════════ TAB 1: REFERENCE TABLE ══════════ -->
+<div id="tab-table" class="tab-panel active">
+
+  <div class="controls">
+    <div class="control-group"><label>Visual Void Rate (%)</label><input type="number" id="visualVoidRate" value="1.38" step="0.01" min="0.01" max="100"></div>
+    <div class="control-group"><label>CT Confirmation Rate (%)</label><input type="number" id="ctRate" value="57" step="0.1" min="0.1" max="100"></div>
+    <div class="control-group"><label>Risk Requirement (%)</label><input type="number" id="riskReq" value="0.5" step="0.01" min="0.01" max="100"></div>
+    <div class="control-group"><label>Design Life (cycles)</label><input type="number" id="designLife" value="20" step="1" min="1" max="200"></div>
+    <div class="control-group"><label>Max Cycles (table)</label><input type="number" id="maxCycles" value="20" step="5" min="5" max="500"></div>
+    <div class="control-group"><label>Max Samples (table)</label><input type="number" id="maxSamples" value="10" step="1" min="2" max="50"></div>
   </div>
-  <div class="control-group">
-    <label>CT Confirmation Rate (%)</label>
-    <input type="number" id="ctRate" value="57" step="0.1" min="0.1" max="100">
+
+  <div class="derived">
+    <div class="derived-item"><span class="label">P(defect)</span><span class="value" id="pDefect">—</span></div>
+    <div class="derived-item"><span class="label">Max allowable P(harm|defect)</span><span class="value" id="maxAllowable">—</span></div>
+    <div class="derived-item"><span class="label">Confidence</span><span class="value">95%</span></div>
+    <div class="derived-item"><span class="label">Method</span><span class="value" style="font-size:11px;padding-top:3px;">One-sided binomial UCB</span></div>
+    <div class="derived-item"><span class="label">Assumption</span><span class="value" style="font-size:11px;padding-top:3px;">Zero failures</span></div>
   </div>
-  <div class="control-group">
-    <label>Risk Requirement (%)</label>
-    <input type="number" id="riskReq" value="0.5" step="0.01" min="0.01" max="100">
+
+  <div class="table-wrapper"><table id="mainTable"></table></div>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(35,134,54,0.4)"></div> Pass — P(loss of vision) &lt; requirement</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(158,106,3,0.4)"></div> Marginal — within 10% of threshold</div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(110,26,26,0.3)"></div> Fail — P(loss of vision) ≥ requirement</div>
   </div>
-  <div class="control-group">
-    <label>Design Life (cycles)</label>
-    <input type="number" id="designLife" value="20" step="1" min="1" max="200">
-  </div>
-  <div class="control-group">
-    <label>Max Cycles (table)</label>
-    <input type="number" id="maxCycles" value="24" step="1" min="1" max="500">
-  </div>
-  <div class="control-group">
-    <label>Max Samples (table)</label>
-    <input type="number" id="maxSamples" value="10" step="1" min="2" max="50">
+
+  <div class="note" id="noteText"></div>
+  <div class="note" style="margin-top:10px;">
+    <strong style="color:var(--text)">Formula:</strong> UCB = 1 − 0.05<sup>1/n<sub>equiv</sub></sup> &nbsp;|&nbsp;
+    n<sub>equiv</sub> = N × (cycles / design life) &nbsp;|&nbsp;
+    P(loss of vision) = P(defect) × UCB &nbsp;|&nbsp;
+    <strong style="color:var(--text)">Note:</strong> Any failure invalidates this table — use the Failure Contingency tab.
   </div>
 </div>
 
-<div class="derived">
-  <div class="derived-item">
-    <span class="label">P(defect)</span>
-    <span class="value" id="pDefect">—</span>
+
+<!-- ══════════ TAB 2: FAILURE CONTINGENCY ══════════ -->
+<div id="tab-contingency" class="tab-panel">
+
+  <p class="section-sub">
+    If one or more samples fail during testing, enter the cycle at which each failure occurred. The calculator determines the required additional cycles for the surviving samples to still satisfy the risk requirement, using the Clopper-Pearson exact binomial method with partial cycle credit for all samples.
+  </p>
+
+  <div class="controls">
+    <div class="control-group"><label>Visual Void Rate (%)</label><input type="number" id="c_visualVoidRate" value="1.38" step="0.01" min="0.01" max="100"></div>
+    <div class="control-group"><label>CT Confirmation Rate (%)</label><input type="number" id="c_ctRate" value="57" step="0.1" min="0.1" max="100"></div>
+    <div class="control-group"><label>Risk Requirement (%)</label><input type="number" id="c_riskReq" value="0.5" step="0.01" min="0.01" max="100"></div>
+    <div class="control-group"><label>Design Life (cycles)</label><input type="number" id="c_designLife" value="20" step="1" min="1" max="200"></div>
+    <div class="control-group"><label>Total Samples (N)</label><input type="number" id="c_totalSamples" value="7" step="1" min="2" max="50"></div>
+    <div class="control-group"><label>Cycles completed so far</label><input type="number" id="c_cyclesSoFar" value="20" step="1" min="1" max="500"></div>
   </div>
-  <div class="derived-item">
-    <span class="label">Max allowable P(harm | defect)</span>
-    <span class="value" id="maxAllowable">—</span>
+
+  <hr class="divider">
+
+  <p style="color:var(--muted);font-size:12px;margin-bottom:14px;">Add one entry per failure. Enter the cycle at which each sample failed.</p>
+  <div id="failureRows"></div>
+  <div style="display:flex;gap:10px;margin-bottom:24px;">
+    <button class="btn" onclick="addFailure()">+ Add Failure</button>
+    <button class="btn btn-danger" onclick="removeFailure()">− Remove Last</button>
   </div>
-  <div class="derived-item">
-    <span class="label">Confidence Level</span>
-    <span class="value">95%</span>
-  </div>
+
+  <hr class="divider">
+  <div id="contingencyResult"></div>
+
 </div>
 
-<div class="table-wrapper">
-  <table id="mainTable">
-  </table>
-</div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:rgba(35,134,54,0.4)"></div> Pass — P(loss of vision) &lt; requirement</div>
-  <div class="legend-item"><div class="legend-dot" style="background:rgba(158,106,3,0.4)"></div> Marginal — within 10% of threshold</div>
-  <div class="legend-item"><div class="legend-dot" style="background:rgba(110,26,26,0.3)"></div> Fail — P(loss of vision) ≥ requirement</div>
-</div>
-
-<div class="note" id="noteText"></div>
 
 <script>
-  function getCycleColumns(designLife, maxCycles) {
-    const cols = [];
-    for (let c = 5; c <= maxCycles; c += 5) cols.push(c);
-    // ensure design life is included if not already a multiple of 5
-    if (!cols.includes(designLife) && designLife <= maxCycles) {
-      cols.push(designLife);
-      cols.sort((a, b) => a - b);
-    }
-    // ensure maxCycles is included if not already a multiple of 5
-    if (!cols.includes(maxCycles)) {
-      cols.push(maxCycles);
-      cols.sort((a, b) => a - b);
-    }
-    return cols;
+// ── Math Utilities ────────────────────────────────────────────────
+
+function ucb0(nEquiv, alpha) {
+  alpha = alpha || 0.05;
+  if (nEquiv <= 0) return 1;
+  return 1 - Math.pow(alpha, 1 / nEquiv);
+}
+
+function equivalentSamples(n, cycles, designLife) {
+  return n * (cycles / designLife);
+}
+
+// Clopper-Pearson exact upper bound: k failures in nEquiv effective trials
+function cpUCB(k, nEquiv, confidence) {
+  confidence = confidence || 0.95;
+  if (k === 0) return ucb0(nEquiv, 1 - confidence);
+  return betaQuantile(confidence, k + 1, nEquiv - k);
+}
+
+function betaQuantile(p, a, b) {
+  var lo = 0, hi = 1, mid;
+  for (var i = 0; i < 120; i++) {
+    mid = (lo + hi) / 2;
+    if (regIncBeta(mid, a, b) < p) lo = mid; else hi = mid;
   }
+  return (lo + hi) / 2;
+}
 
-  function ucb0(nEquiv, alpha = 0.05) {
-    if (nEquiv <= 0) return 1;
-    return 1 - Math.pow(alpha, 1 / nEquiv);
+function regIncBeta(x, a, b) {
+  if (x <= 0) return 0;
+  if (x >= 1) return 1;
+  var lbeta = lgamma(a + b) - lgamma(a) - lgamma(b);
+  var front = Math.exp(lbeta + a * Math.log(x) + b * Math.log(1 - x)) / a;
+  return front * betaCF(x, a, b);
+}
+
+function betaCF(x, a, b) {
+  var c = 1, d = 1 - (a + b) * x / (a + 1), h, aa, delta;
+  if (Math.abs(d) < 1e-30) d = 1e-30;
+  d = 1 / d; h = d;
+  for (var m = 1; m <= 300; m++) {
+    aa = m * (b - m) * x / ((a + 2*m - 1) * (a + 2*m));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+    d = 1 / d; h *= d * c;
+    aa = -(a + m) * (a + b + m) * x / ((a + 2*m) * (a + 2*m + 1));
+    d = 1 + aa * d; if (Math.abs(d) < 1e-30) d = 1e-30;
+    c = 1 + aa / c; if (Math.abs(c) < 1e-30) c = 1e-30;
+    d = 1 / d; delta = d * c; h *= delta;
+    if (Math.abs(delta - 1) < 3e-8) break;
   }
+  return h;
+}
 
-  function equivalentSamples(nSamples, cycles, designLife) {
-    return nSamples * (cycles / designLife);
-  }
+function lgamma(z) {
+  var c = [76.18009172947146,-86.50532032941677,24.01409824083091,
+           -1.231739572450155,1.208650973866179e-3,-5.395239384953e-6];
+  var x = z, y = z, tmp = x + 5.5, ser = 1.000000000190015;
+  tmp = (x + 0.5) * Math.log(tmp) - tmp;
+  for (var j = 0; j < 6; j++) ser += c[j] / ++y;
+  return tmp + Math.log(2.5066282746310005 * ser / x);
+}
 
-  function render() {
-    const visualVoidRate = parseFloat(document.getElementById('visualVoidRate').value) / 100;
-    const ctRate = parseFloat(document.getElementById('ctRate').value) / 100;
-    const riskReq = parseFloat(document.getElementById('riskReq').value) / 100;
-    const designLife = parseInt(document.getElementById('designLife').value);
-    const maxCycles = parseInt(document.getElementById('maxCycles').value);
-    const maxSamples = parseInt(document.getElementById('maxSamples').value);
+// ── Tab Switching ─────────────────────────────────────────────────
 
-    if (!visualVoidRate || !ctRate || !riskReq || !designLife || !maxCycles || !maxSamples) return;
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-panel').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.remove('active'); });
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
 
-    const pDefect = visualVoidRate * ctRate;
-    const maxAllowable = riskReq / pDefect;
+// ── Tab 1: Reference Table ────────────────────────────────────────
 
-    document.getElementById('pDefect').textContent = (pDefect * 100).toFixed(4) + '%';
-    document.getElementById('maxAllowable').textContent = (maxAllowable * 100).toFixed(2) + '%';
+function getCycleColumns(designLife, maxCycles) {
+  var cols = [], c;
+  for (c = 5; c <= maxCycles; c += 5) cols.push(c);
+  if (cols.indexOf(designLife) === -1 && designLife <= maxCycles) { cols.push(designLife); cols.sort(function(a,b){return a-b;}); }
+  if (cols.indexOf(maxCycles) === -1) { cols.push(maxCycles); cols.sort(function(a,b){return a-b;}); }
+  return cols;
+}
 
-    const cycleCols = getCycleColumns(designLife, maxCycles);
-    const sampleCounts = [];
-    for (let n = 2; n <= maxSamples; n++) sampleCounts.push(n);
+function renderTable() {
+  var vvr = parseFloat(document.getElementById('visualVoidRate').value) / 100;
+  var ctr = parseFloat(document.getElementById('ctRate').value) / 100;
+  var rr  = parseFloat(document.getElementById('riskReq').value) / 100;
+  var dl  = parseInt(document.getElementById('designLife').value);
+  var mc  = parseInt(document.getElementById('maxCycles').value);
+  var ms  = parseInt(document.getElementById('maxSamples').value);
+  if (!vvr || !ctr || !rr || !dl || !mc || !ms) return;
 
-    const table = document.getElementById('mainTable');
-    table.innerHTML = '';
+  var pD = vvr * ctr;
+  var maxU = rr / pD;
+  document.getElementById('pDefect').textContent = (pD * 100).toFixed(4) + '%';
+  document.getElementById('maxAllowable').textContent = (maxU * 100).toFixed(2) + '%';
 
-    // Header
-    const thead = document.createElement('thead');
-    const headerRow = document.createElement('tr');
-    const cornerTh = document.createElement('th');
-    cornerTh.className = 'row-header';
-    cornerTh.textContent = 'N samples \\ Cycles';
-    headerRow.appendChild(cornerTh);
+  var cols = getCycleColumns(dl, mc);
+  var ns = []; for (var n = 2; n <= ms; n++) ns.push(n);
 
-    cycleCols.forEach(c => {
-      const th = document.createElement('th');
-      th.textContent = c === designLife ? `${c} ★` : c;
-      if (c === designLife) th.style.color = 'var(--accent)';
-      headerRow.appendChild(th);
-    });
-    thead.appendChild(headerRow);
-    table.appendChild(thead);
-
-    // Body
-    const tbody = document.createElement('tbody');
-
-    sampleCounts.forEach(n => {
-      const tr = document.createElement('tr');
-      const rowLabel = document.createElement('td');
-      rowLabel.className = 'row-label';
-      rowLabel.textContent = `n = ${n}`;
-      tr.appendChild(rowLabel);
-
-      cycleCols.forEach(c => {
-        const td = document.createElement('td');
-        const nEquiv = equivalentSamples(n, c, designLife);
-        const ucb = ucb0(nEquiv);
-        const pHarm = pDefect * ucb;
-
-        td.textContent = (ucb * 100).toFixed(1) + '%';
-
-        const margin = maxAllowable * 0.10;
-        if (pHarm < riskReq) {
-          if (ucb > maxAllowable - margin) {
-            td.className = 'warn';
-            td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% — marginal`;
-          } else {
-            td.className = 'pass';
-            td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% ✓`;
-          }
-        } else {
-          td.className = 'fail';
-          td.title = `P(loss of vision) = ${(pHarm*100).toFixed(3)}% — exceeds requirement`;
-        }
-
-        if (c === designLife) td.classList.add('threshold-col');
-        tr.appendChild(td);
-      });
-
-      tbody.appendChild(tr);
-    });
-
-    table.appendChild(tbody);
-
-    // Footer note — min cycles for each sample size in range
-    const noteLines = sampleCounts.map(n => {
-      const minC = findMinCycles(n, designLife, pDefect, riskReq);
-      const color = minC !== 'N/A' && minC <= maxCycles ? 'var(--pass-text)' : 'var(--fail-text)';
-      const label = minC === 'N/A' || minC > maxCycles ? `out of range` : `${minC} cycles`;
-      return `n=${n}: <strong style="color:${color}">${label}</strong>`;
-    });
-    document.getElementById('noteText').innerHTML =
-      `★ = design life (${designLife} cycles) &nbsp;|&nbsp; Min cycles to pass (0 failures): &nbsp;` +
-      noteLines.join(' &nbsp;|&nbsp; ');
-  }
-
-  function findMinCycles(n, designLife, pDefect, riskReq) {
-    for (let c = 1; c <= 9999; c++) {
-      const nEquiv = equivalentSamples(n, c, designLife);
-      const ucb = ucb0(nEquiv);
-      if (pDefect * ucb < riskReq) return c;
-    }
-    return 'N/A';
-  }
-
-  ['visualVoidRate', 'ctRate', 'riskReq', 'designLife', 'maxCycles', 'maxSamples'].forEach(id => {
-    document.getElementById(id).addEventListener('input', render);
+  var table = document.getElementById('mainTable');
+  table.innerHTML = '';
+  var thead = document.createElement('thead');
+  var hr = document.createElement('tr');
+  var ch = document.createElement('th'); ch.className = 'row-header'; ch.textContent = 'N \\ Cycles'; hr.appendChild(ch);
+  cols.forEach(function(c) {
+    var th = document.createElement('th');
+    th.textContent = c === dl ? c + ' ★' : c;
+    if (c === dl) th.style.color = 'var(--accent)';
+    hr.appendChild(th);
   });
+  thead.appendChild(hr); table.appendChild(thead);
 
-  render();
+  var tbody = document.createElement('tbody');
+  ns.forEach(function(n) {
+    var tr = document.createElement('tr');
+    var rl = document.createElement('td'); rl.className = 'row-label'; rl.textContent = 'n = ' + n; tr.appendChild(rl);
+    cols.forEach(function(c) {
+      var td = document.createElement('td');
+      var ne = equivalentSamples(n, c, dl);
+      var ucb = ucb0(ne);
+      var ph = pD * ucb;
+      td.textContent = (ucb * 100).toFixed(1) + '%';
+      var margin = maxU * 0.10;
+      if (ph < rr) {
+        td.className = ucb > maxU - margin ? 'warn' : 'pass';
+        td.title = 'P(loss of vision) = ' + (ph*100).toFixed(3) + '%' + (td.className === 'pass' ? ' ✓' : ' — marginal');
+      } else {
+        td.className = 'fail';
+        td.title = 'P(loss of vision) = ' + (ph*100).toFixed(3) + '% — exceeds requirement';
+      }
+      if (c === dl) td.classList.add('threshold-col');
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+
+  var lines = ns.map(function(n) {
+    var minC = findMinCycles(n, dl, pD, rr);
+    var ok = minC !== 'N/A' && minC <= mc;
+    return 'n=' + n + ': <strong style="color:' + (ok ? 'var(--pass-text)' : 'var(--fail-text)') + '">' + (ok ? minC + ' cycles' : 'out of range') + '</strong>';
+  });
+  document.getElementById('noteText').innerHTML = '★ = design life (' + dl + ' cycles) &nbsp;|&nbsp; Min cycles to pass (0 failures): &nbsp;' + lines.join(' &nbsp;|&nbsp; ');
+}
+
+function findMinCycles(n, dl, pD, rr) {
+  for (var c = 1; c <= 9999; c++) {
+    if (pD * ucb0(equivalentSamples(n, c, dl)) < rr) return c;
+  }
+  return 'N/A';
+}
+
+['visualVoidRate','ctRate','riskReq','designLife','maxCycles','maxSamples'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', renderTable);
+});
+
+// ── Tab 2: Failure Contingency ────────────────────────────────────
+
+var failureCount = 0;
+
+function addFailure() {
+  failureCount++;
+  var id = failureCount;
+  var container = document.getElementById('failureRows');
+  var div = document.createElement('div');
+  div.className = 'failure-row';
+  div.id = 'failure-row-' + id;
+  div.innerHTML =
+    '<span class="fail-badge">Failure ' + id + '</span>' +
+    '<label>Failed at cycle</label>' +
+    '<input type="number" id="fail_cycle_' + id + '" min="1" max="500" step="1" value="20">';
+  container.appendChild(div);
+  document.getElementById('fail_cycle_' + id).addEventListener('input', renderContingency);
+  renderContingency();
+}
+
+function removeFailure() {
+  if (failureCount === 0) return;
+  var row = document.getElementById('failure-row-' + failureCount);
+  if (row) row.remove();
+  failureCount--;
+  renderContingency();
+}
+
+function renderContingency() {
+  var vvr = parseFloat(document.getElementById('c_visualVoidRate').value) / 100;
+  var ctr = parseFloat(document.getElementById('c_ctRate').value) / 100;
+  var rr  = parseFloat(document.getElementById('c_riskReq').value) / 100;
+  var dl  = parseInt(document.getElementById('c_designLife').value);
+  var N   = parseInt(document.getElementById('c_totalSamples').value);
+  var csf = parseInt(document.getElementById('c_cyclesSoFar').value);
+  if (!vvr || !ctr || !rr || !dl || !N || !csf) return;
+
+  var pD = vvr * ctr;
+  var maxU = rr / pD;
+
+  // Collect failures
+  var failCycles = [];
+  for (var i = 1; i <= failureCount; i++) {
+    var el = document.getElementById('fail_cycle_' + i);
+    if (el) failCycles.push(parseFloat(el.value) || 0);
+  }
+
+  var nF = failCycles.length;
+  var nS = N - nF;
+  var resultEl = document.getElementById('contingencyResult');
+
+  if (nS <= 0) {
+    resultEl.innerHTML = '<div class="result-card fail-card"><div class="result-title" style="color:var(--fail-text)">❌ All samples failed — no recovery path.</div></div>';
+    return;
+  }
+
+  // Equivalent sample contributions
+  var failContrib = failCycles.reduce(function(s, fc) { return s + fc / dl; }, 0);
+  var survContribNow = nS * (csf / dl);
+  var nEquivNow = survContribNow + failContrib;
+
+  var ucbNow = cpUCB(nF, nEquivNow);
+  var pHarmNow = pD * ucbNow;
+  var passesNow = pHarmNow < rr;
+
+  // Find additional cycles needed on survivors
+  var additionalCycles = 0, found = false;
+  for (var extra = 0; extra <= 5000; extra++) {
+    var nEquivTest = nS * ((csf + extra) / dl) + failContrib;
+    if (pD * cpUCB(nF, nEquivTest) < rr) {
+      additionalCycles = extra;
+      found = true;
+      break;
+    }
+  }
+
+  var totalRequired = csf + additionalCycles;
+  var nEquivFinal = nS * (totalRequired / dl) + failContrib;
+  var ucbFinal = cpUCB(nF, nEquivFinal);
+  var pHarmFinal = pD * ucbFinal;
+
+  var cardClass = !found ? 'fail-card' : passesNow ? 'pass-card' : 'warn-card';
+  var verdictClass = !found ? 'fail' : passesNow ? 'pass' : 'warn';
+
+  var failList = failCycles.map(function(fc, i) {
+    return 'Failure ' + (i+1) + ': cycle ' + fc + ' &nbsp;(' + (fc/dl*100).toFixed(0) + '% of design life)';
+  }).join('<br>');
+
+  var html = '<div class="result-card ' + cardClass + '">';
+  html += '<div class="result-title">' + (nF === 0 ? 'Zero Failures' : nF + ' Failure' + (nF > 1 ? 's' : '')) + ' — Clopper-Pearson Exact Binomial</div>';
+
+  html += '<div class="result-grid">';
+  html += stat('Total Samples', N, '');
+  html += stat('Failures', nF, 'fail');
+  html += stat('Survivors', nS, '');
+  html += stat('n_equiv (now)', nEquivNow.toFixed(2), '');
+  html += stat('UCB on P(harm|defect) now', (ucbNow*100).toFixed(1) + '%', passesNow ? 'pass' : 'fail');
+  html += stat('P(loss of vision) now', (pHarmNow*100).toFixed(3) + '%', passesNow ? 'pass' : 'fail');
+  html += '</div>';
+
+  if (!passesNow && found) {
+    html += '<div class="sub-section"><div class="result-grid">';
+    html += stat('Additional cycles needed', '+' + additionalCycles, 'warn');
+    html += stat('Total cycles on survivors', totalRequired, 'warn');
+    html += stat('UCB after additional cycles', (ucbFinal*100).toFixed(1) + '%', 'pass');
+    html += stat('P(loss of vision) after', (pHarmFinal*100).toFixed(3) + '%', 'pass');
+    html += '</div></div>';
+  }
+
+  if (passesNow) {
+    html += '<div class="verdict pass">✅ PASS — Risk requirement already satisfied. No additional cycles needed.</div>';
+  } else if (found) {
+    html += '<div class="verdict warn">⚠ ' + nS + ' survivor' + (nS>1?'s':'') + ' must reach <strong>' + totalRequired + ' total cycles</strong> (+' + additionalCycles + ' more from current ' + csf + ')</div>';
+  } else {
+    html += '<div class="verdict fail">❌ No recovery path — requirement cannot be satisfied with this failure pattern, even with extended testing.</div>';
+  }
+
+  if (nF > 0) {
+    html += '<div class="result-detail">';
+    html += '<strong style="color:var(--text)">Failure detail:</strong><br>' + failList + '<br><br>';
+    html += '<strong style="color:var(--text)">Method:</strong> n<sub>equiv</sub> = (survivors × cycles_total/DL) + Σ(fail_cycle<sub>i</sub>/DL). Clopper-Pearson exact upper bound at 95% confidence with ' + nF + ' observed failure' + (nF>1?'s':'') + '.<br><br>';
+    html += '<strong style="color:var(--text)">P(defect):</strong> ' + (pD*100).toFixed(4) + '% &nbsp;|&nbsp; ';
+    html += '<strong style="color:var(--text)">Max allowable UCB:</strong> ' + (maxU*100).toFixed(2) + '% &nbsp;|&nbsp; ';
+    html += '<strong style="color:var(--text)">Requirement:</strong> P(loss of vision) &lt; ' + (rr*100).toFixed(2) + '%';
+    html += '</div>';
+  }
+
+  html += '</div>';
+  resultEl.innerHTML = html;
+}
+
+function stat(label, value, cls) {
+  return '<div class="result-stat"><span class="r-label">' + label + '</span><span class="r-value ' + cls + '">' + value + '</span></div>';
+}
+
+['c_visualVoidRate','c_ctRate','c_riskReq','c_designLife','c_totalSamples','c_cyclesSoFar'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', renderContingency);
+});
+
+// Init
+renderTable();
+renderContingency();
 </script>
 </body>
 </html>
