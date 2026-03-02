@@ -107,11 +107,14 @@
   .failure-row input:focus { border-color: var(--accent); }
 
   /* ── Sample Tracker tab ── */
-  .sample-row { display: grid; grid-template-columns: 70px 140px 150px 1fr; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 6px; padding: 9px 14px; margin-bottom: 7px; transition: border-color 0.15s; }
+  .sample-row { display: grid; grid-template-columns: 50px 1fr 130px 140px 1fr; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border); border-left: 3px solid var(--border); border-radius: 6px; padding: 9px 14px; margin-bottom: 7px; transition: border-color 0.15s; }
   .sample-row.row-active { border-left-color: var(--accent); }
   .sample-row.row-failed { border-left-color: var(--fail-text); }
   .sample-row.row-censored { border-left-color: var(--muted); }
-  .sample-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); }
+  .sample-label { font-family: 'IBM Plex Mono', monospace; font-size: 12px; font-weight: 600; color: var(--muted); }
+  .sample-name-input { background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; padding: 3px 4px; width: 100%; outline: none; transition: border-color 0.15s; }
+  .sample-name-input:focus { border-bottom-color: var(--accent); }
+  .sample-name-input::placeholder { color: var(--muted); font-style: italic; }
   .sample-status { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 12px; padding: 5px 8px; border-radius: 4px; outline: none; cursor: pointer; width: 100%; }
   .sample-status:focus { border-color: var(--accent); }
   .sample-cycles { background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'IBM Plex Mono', monospace; font-size: 13px; padding: 5px 10px; border-radius: 4px; width: 100%; outline: none; }
@@ -230,8 +233,9 @@
   </div>
 
   <!-- Column headers -->
-  <div style="display:grid;grid-template-columns:70px 140px 150px 1fr;gap:10px;padding:4px 14px 6px;margin-bottom:2px;">
-    <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Sample</span>
+  <div style="display:grid;grid-template-columns:50px 1fr 130px 140px 1fr;gap:10px;padding:4px 14px 6px;margin-bottom:2px;">
+    <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">#</span>
+    <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Label</span>
     <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Status</span>
     <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">Cycles Completed</span>
     <span style="font-size:9px;font-family:'IBM Plex Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;">n_equiv Contribution</span>
@@ -328,7 +332,8 @@ function saveAll() {
   for (var i = 1; i <= sampleCount; i++) {
     var sEl = document.getElementById('s_status_'+i);
     var cEl = document.getElementById('s_cycles_'+i);
-    if (sEl && cEl) samples.push({ status: sEl.value, cycles: parseFloat(cEl.value)||0 });
+    var lEl = document.getElementById('s_label_'+i);
+    if (sEl && cEl) samples.push({ status: sEl.value, cycles: parseFloat(cEl.value)||0, label: lEl ? lEl.value : '' });
   }
   var data = {
     globals: {
@@ -401,7 +406,7 @@ function loadAll() {
     }
 
     if (data.tracker && data.tracker.samples && data.tracker.samples.length) {
-      data.tracker.samples.forEach(function(s) { addSample(s.status, s.cycles); });
+      data.tracker.samples.forEach(function(s) { addSample(s.status, s.cycles, s.label || ''); });
     }
 
     return true;
@@ -584,17 +589,19 @@ function renderContingency() {
 
 var sampleCount = 0;
 
-function addSample(status, cycles) {
+function addSample(status, cycles, label) {
   sampleCount++;
   var id = sampleCount;
   status = status || 'active';
   cycles = cycles !== undefined ? cycles : 0;
+  label  = label  !== undefined ? label  : '';
 
   var div = document.createElement('div');
   div.className = 'sample-row row-'+status;
   div.id = 'sample-row-'+id;
   div.innerHTML =
     '<span class="sample-label">S'+id+'</span>' +
+    '<input class="sample-name-input" type="text" id="s_label_'+id+'" placeholder="e.g. Unit A, SN-001…" maxlength="40" value="'+label.replace(/"/g,'&quot;')+'">' +
     '<select class="sample-status" id="s_status_'+id+'">' +
       '<option value="active"'+(status==='active'?' selected':'')+'>Active</option>' +
       '<option value="failed"'+(status==='failed'?' selected':'')+'>Failed</option>' +
@@ -605,6 +612,9 @@ function addSample(status, cycles) {
 
   document.getElementById('sampleRows').appendChild(div);
 
+  document.getElementById('s_label_'+id).addEventListener('input', function() {
+    scheduleSave();
+  });
   document.getElementById('s_status_'+id).addEventListener('change', function() {
     var s = this.value;
     document.getElementById('sample-row-'+id).className = 'sample-row row-'+s;
@@ -649,10 +659,12 @@ function renderTracker() {
     var coEl=document.getElementById('s_contrib_'+i);
     if(!sEl||!cEl) continue;
     var st=sEl.value, cy=parseFloat(cEl.value)||0, contrib=cy/g.dl;
+    var lEl=document.getElementById('s_label_'+i);
+    var lbl=lEl ? lEl.value.trim() : '';
     ne_total+=contrib;
     if(st==='failed') nFailed++;
     if(coEl) coEl.textContent=contrib.toFixed(3)+' equiv ('+((cy/g.dl)*100).toFixed(0)+'% of DL)';
-    samples.push({id:i,status:st,cycles:cy,contrib:contrib});
+    samples.push({id:i,status:st,cycles:cy,contrib:contrib,label:lbl});
   }
 
   var ucbNow=cpUCB(nFailed,ne_total), pNow=pD*ucbNow, passNow=pNow<g.rr;
@@ -695,7 +707,7 @@ function renderTracker() {
   tH+='<div style="font-family:\'IBM Plex Mono\',monospace;font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px;">Per-Sample Breakdown</div>';
   tH+='<table style="width:100%;border-collapse:collapse;font-family:\'IBM Plex Mono\',monospace;font-size:12px;">';
   tH+='<thead><tr>';
-  ['Sample','Status','Cycles','n_equiv','% of DL','Needs'].forEach(function(h){
+  ['#','Label','Status','Cycles','n_equiv','% of DL','Needs'].forEach(function(h){
     tH+='<th style="background:var(--surface);color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:0.7px;padding:7px 12px;text-align:left;border-bottom:1px solid var(--border);">'+h+'</th>';
   });
   tH+='</tr></thead><tbody>';
@@ -703,6 +715,7 @@ function renderTracker() {
   samples.forEach(function(s){
     var sc=s.status==='active'?'var(--accent)':s.status==='failed'?'var(--fail-text)':'var(--muted)';
     var pctDL=(s.cycles/g.dl*100).toFixed(0);
+    var displayLabel = s.label || ('<span style="color:var(--muted);font-style:italic;">—</span>');
     var nH;
     if(s.status==='failed') nH='<span class="needs-badge failed-b">Failed @ '+s.cycles+'</span>';
     else if(s.status==='censored') nH='<span class="needs-badge censored-b">Censored</span>';
@@ -714,7 +727,8 @@ function renderTracker() {
     } else nH='<span class="needs-badge failed-b">No path</span>';
 
     tH+='<tr>';
-    tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);font-weight:600;">S'+s.id+'</td>';
+    tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);font-weight:600;color:var(--muted);">S'+s.id+'</td>';
+    tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);font-weight:600;color:var(--text);">'+displayLabel+'</td>';
     tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);color:'+sc+';text-transform:capitalize;">'+s.status+'</td>';
     tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);">'+s.cycles+'</td>';
     tH+='<td style="padding:7px 12px;border-bottom:1px solid var(--border);">'+s.contrib.toFixed(3)+'</td>';
