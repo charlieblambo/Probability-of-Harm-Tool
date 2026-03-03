@@ -8,7 +8,7 @@ Built to support ISO 14971 risk management arguments for surgical devices with m
 
 ## Live Tool
 
-👉 [https://charlieblambo.github.io/Intuitive-Files](https://charlieblambo.github.io/Intuitive-Files)
+👉 [https://charlieblambo.github.io/Probability-of-Harm-Tool](https://charlieblambo.github.io/Probability-of-Harm-Tool)
 
 ---
 
